@@ -1,19 +1,34 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Google Sheets API Quickstart</title>
+    <title>Software & Computing Gantt Chart</title>
     <meta charset="utf-8" />
 
     <link rel="stylesheet" href="frappe-gantt.css">
 </head>
 <body>
-<p>Google Sheets API Quickstart</p>
+<p>Software & Computing Gantt Chart</p>
 
 <!--Add buttons to initiate auth sequence and sign out-->
 <button id="authorize_button" style="display: none;">Authorize</button>
 <button id="signout_button" style="display: none;">Sign Out</button>
 
 <pre id="content" style="white-space: pre-wrap;"></pre>
+
+<select name="year" id="year_select">
+    <option value="2020" selected>2020</option>
+    <option value="2021">2021</option>
+</select>
+
+<select name="wbs_area" id="wbs_area_select">
+    <option value="all">All</option>
+    <option value="wbs1" selected>WBS1</option>
+    <option value="wbs2">WBS2</option>
+    <option value="wbs3">WBS3</option>
+    <option value="wbs4">WBS4</option>
+</select>
+
+<input type="checkbox" id="minor_filter">Include minor milestones?
 
 <script type="text/javascript" >
     // Client ID and API key from the Developer Console
@@ -29,6 +44,19 @@
 
     var authorizeButton = document.getElementById('authorize_button');
     var signoutButton = document.getElementById('signout_button');
+
+    var spreadsheets = {
+        year: "2020",
+        sheetData : {
+            spreadsheetId: '1Qi3ksAf_36WEz92z8ZqzMnvB-6jD41rFcVyXagKbqW8',
+            range: 'CY20!A2:J'
+        },
+        year: "2021",
+        sheetData : {
+            spreadsheetId: '1Qi3ksAf_36WEz92z8ZqzMnvB-6jD41rFcVyXagKbqW8',
+            range: 'CY21!A2:J'
+        }
+    };
 
     /**
      *  On load, called to load the auth2 library and API client library.
@@ -102,6 +130,42 @@
         pre.appendChild(textContent);
     }
 
+    function filterData(data) {
+        const cb = document.getElementById('minor_filter');
+        const byWBS = document.getElementById('wbs_area_select');
+        var opt = byWBS.options[byWBS.selectedIndex];
+        var wbsFilter = opt.value;
+        // var major = [];
+        if (!cb.checked) {
+            var major = data.reduce(function (res, value) {
+                var major = value.id.split(".");
+                if ((major[2] == "00")) {
+                    res.push(value);
+                }
+                return res;
+            }, []);
+            data = major
+        }
+
+        // var wbs = [];
+        if (wbsFilter != 'all') {
+            var wbs = data.reduce(function (res, value) {
+                var wbsGroup = value.custom_class.split("-");
+                if ("wbs" + wbsGroup[1] == wbsFilter) {
+                    res.push(value)
+                }
+                return res;
+
+            }, []);
+            return wbs;
+        } else {
+            return data;
+        }
+
+        // return data;
+
+    }
+
     function makeGantt() {
         gapi.client.sheets.spreadsheets.values.get({
             // spreadsheetId: '1astWf1jlEIF2PCziDdLZlTqyBxr88XCe4Nw5gEcG6VI',
@@ -113,7 +177,7 @@
             var data = range.values;
             var tasks = data.reduce(function (res, value) {
                 var major = value[3].split(".");
-                if ((major[2] == "00")) {
+                // if ((major[2] == "00")) {
                     var start_date = value[7];
                     var end_date = value[9];
 
@@ -136,10 +200,11 @@
                         custom_class: 'wbs-' + value[0] + '-color'
                     };
                     res.push(row);
-                }
+                // }
                 return res;
             }, []);
-            var gantt = new Gantt('#gantt', tasks, {column_width: 5});
+            var filterTasks = filterData(tasks);
+            var gantt = new Gantt('#gantt', filterTasks, {column_width: 5});
             gantt.change_view_mode('Month');
         }, function (response) {
             appendPre('Error: ' + response.result.error.message);
