@@ -29,7 +29,7 @@
     <option value="wbs4">WBS4</option>
 </select>
 
-<input type="checkbox" id="minor_filter">Include minor milestones?
+<!--<input type="checkbox" id="minor_filter">Include minor milestones?-->
 
 <br>
 <button id="update_button">Update</button>
@@ -147,12 +147,17 @@
     }
 
     function filterData(data) {
-        const cb = document.getElementById('minor_filter');
+        // const cb = document.getElementById('minor_filter');
+        const byYear = document.getElementById('year_select');
+        var yearSelect = byYear.options[byYear.selectedIndex];
+        var chartYear = yearSelect.value;
+        const cb = false
         const byWBS = document.getElementById('wbs_area_select');
         var opt = byWBS.options[byWBS.selectedIndex];
         var wbsFilter = opt.value;
         // var major = [];
-        if (cb.checked) {
+        // if (cb.checked) {
+        if (cb || chartYear == "2020") {
             var major = data.reduce(function (res, value) {
                 var major = value.id.split(".");
                 if ((major[2] == "00")) {
