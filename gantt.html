@@ -17,8 +17,8 @@
 <pre id="content" style="white-space: pre-wrap;"></pre>
 
 <select name="year" id="year_select">
-    <option value="2020" selected>2020</option>
-    <option value="2021">2021</option>
+    <option value="2020">2020</option>
+    <option value="2021" selected>2021</option>
 </select>
 
 <select name="wbs_area" id="wbs_area_select">
@@ -63,7 +63,7 @@
         },
         "2021" : {
             spreadsheetId: '1Qi3ksAf_36WEz92z8ZqzMnvB-6jD41rFcVyXagKbqW8',
-            range: 'CY21!A3:J25'
+            range: 'CY21!A3:38'
         }
     };
 
@@ -210,16 +210,18 @@
             var tasks = data.reduce(function (res, value) {
                 // var major = value[3].split(".");
                 if ((value[3] != null && value[3] != "") ) {
-                    var start_date = value[7];
-                    var end_date = value[9];
+                    var start_date = value[7] || new Date(chartYear, 0, 1);
+                    var end_date = value[9] || value[8] || new Date(chartYear, 11, 31);
 
-                    if (start_date === "") {
+                    if (isNaN(Date.parse(start_date))) {
                         start_date = new Date(chartYear, 0, 1);
                     }
 
-                    if (end_date === "" || end_date == null) {
-                        end_date = value[8]
+                    if (isNaN(Date.parse(end_date))) {
+                        end_date = new Date(chartYear, 11, 31);
                     }
+
+                    !isNaN(Date.parse())
                     var g_start_date = new Date(start_date).toISOString().split('T')[0];
                     var g_end_date = new Date(end_date).toISOString().split('T')[0];
                     var row = {
