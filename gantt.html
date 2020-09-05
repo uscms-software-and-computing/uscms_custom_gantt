@@ -63,7 +63,7 @@
         },
         "2021" : {
             spreadsheetId: '1Qi3ksAf_36WEz92z8ZqzMnvB-6jD41rFcVyXagKbqW8',
-            range: 'CY21!A3:38'
+            range: 'CY21!A3:59'
         }
     };
 
@@ -147,6 +147,32 @@
     }
 
     function filterData(data) {
+        const byYear = document.getElementById('year_select');
+        var yearSelect = byYear.options[byYear.selectedIndex];
+        var chartYear = yearSelect.value;
+        const cb = false
+        const byWBS = document.getElementById('wbs_area_select');
+        var opt = byWBS.options[byWBS.selectedIndex];
+        var wbsFilter = opt.value;
+
+        if (wbsFilter != 'all') {
+            var wbs = data.reduce(function (res, value) {
+                var wbsGroup = value.custom_class.split("-");
+                if ("wbs" + wbsGroup[1] == wbsFilter) {
+                    res.push(value)
+                }
+                return res;
+
+            }, []);
+            return wbs;
+        } else {
+            return data;
+        }
+
+    }
+
+
+    function filterData2020(data) {
         // const cb = document.getElementById('minor_filter');
         const byYear = document.getElementById('year_select');
         var yearSelect = byYear.options[byYear.selectedIndex];
@@ -191,6 +217,61 @@
         const byYear = document.getElementById('year_select');
         var yearSelect = byYear.options[byYear.selectedIndex];
         var chartYear = yearSelect.value;
+        if (chartYear == "2020") {
+            makeGantt2020(chartYear);
+        }
+        ganttSheetId = spreadsheets[chartYear].spreadsheetId;
+        ganttRange = spreadsheets[chartYear].range;
+        gapi.client.sheets.spreadsheets.values.get(
+            {
+                spreadsheetId: ganttSheetId,
+                range: ganttRange
+            }
+        ).then(function (response) {
+            var range = response.result;
+            var data = range.values;
+            var tasks = data.reduce(function (res, value) {
+                if ((value[3] != null && value[3] != "") ) {
+                    var start_date = value[12] || new Date(chartYear, 0, 1);
+                    var end_date = value[14] || value[13] || new Date(chartYear, 11, 31);
+
+                    if (isNaN(Date.parse(start_date))) {
+                        start_date = new Date(chartYear, 0, 1);
+                    }
+
+                    if (isNaN(Date.parse(end_date))) {
+                        end_date = new Date(chartYear, 11, 31);
+                    }
+
+                    !isNaN(Date.parse())
+                    var g_start_date = new Date(start_date).toISOString().split('T')[0];
+                    var g_end_date = new Date(end_date).toISOString().split('T')[0];
+                    var row = {
+                        id: value[7],
+                        name: value[7],
+                        start: g_start_date,
+                        end: g_end_date,
+                        progress: 100,
+                        dependencies: '',
+                        custom_class: 'wbs-' + value[2] + '-color'
+                    };
+                    res.push(row);
+                }
+                return res;
+            }, []);
+            var filterTasks = filterData(tasks);
+            if ( gantt == null ) {
+                gantt = new Gantt('#gantt', filterTasks, {column_width: 5});
+            } else {
+                gantt.refresh(filterTasks)
+            }
+            gantt.change_view_mode('Month');
+        }, function (response) {
+            appendPre('Error: ' + response.result.error.message);
+        });
+    }
+
+    function makeGantt2020(chartYear) {
         // gapi.client.sheets.spreadsheets.values.get({
         //     // spreadsheetId: '1astWf1jlEIF2PCziDdLZlTqyBxr88XCe4Nw5gEcG6VI',
         //     // range: 'CY20!A2:J',
@@ -237,7 +318,7 @@
                 }
                 return res;
             }, []);
-            var filterTasks = filterData(tasks);
+            var filterTasks = filterData2020(tasks);
             if ( gantt == null ) {
                 gantt = new Gantt('#gantt', filterTasks, {column_width: 5});
             } else {
