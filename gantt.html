@@ -219,56 +219,57 @@
         var chartYear = yearSelect.value;
         if (chartYear == "2020") {
             makeGantt2020(chartYear);
-        }
-        ganttSheetId = spreadsheets[chartYear].spreadsheetId;
-        ganttRange = spreadsheets[chartYear].range;
-        gapi.client.sheets.spreadsheets.values.get(
-            {
-                spreadsheetId: ganttSheetId,
-                range: ganttRange
-            }
-        ).then(function (response) {
-            var range = response.result;
-            var data = range.values;
-            var tasks = data.reduce(function (res, value) {
-                if ((value[3] != null && value[3] != "") ) {
-                    var start_date = value[12] || new Date(chartYear, 0, 1);
-                    var end_date = value[14] || value[13] || new Date(chartYear, 11, 31);
-
-                    if (isNaN(Date.parse(start_date))) {
-                        start_date = new Date(chartYear, 0, 1);
-                    }
-
-                    if (isNaN(Date.parse(end_date))) {
-                        end_date = new Date(chartYear, 11, 31);
-                    }
-
-                    !isNaN(Date.parse())
-                    var g_start_date = new Date(start_date).toISOString().split('T')[0];
-                    var g_end_date = new Date(end_date).toISOString().split('T')[0];
-                    var row = {
-                        id: value[7],
-                        name: value[7],
-                        start: g_start_date,
-                        end: g_end_date,
-                        progress: 100,
-                        dependencies: '',
-                        custom_class: 'wbs-' + value[2] + '-color'
-                    };
-                    res.push(row);
+        } else {
+            ganttSheetId = spreadsheets[chartYear].spreadsheetId;
+            ganttRange = spreadsheets[chartYear].range;
+            gapi.client.sheets.spreadsheets.values.get(
+                {
+                    spreadsheetId: ganttSheetId,
+                    range: ganttRange
                 }
-                return res;
-            }, []);
-            var filterTasks = filterData(tasks);
-            if ( gantt == null ) {
-                gantt = new Gantt('#gantt', filterTasks, {column_width: 5});
-            } else {
-                gantt.refresh(filterTasks)
-            }
-            gantt.change_view_mode('Month');
-        }, function (response) {
-            appendPre('Error: ' + response.result.error.message);
-        });
+            ).then(function (response) {
+                var range = response.result;
+                var data = range.values;
+                var tasks = data.reduce(function (res, value) {
+                    if ((value[3] != null && value[3] != "")) {
+                        var start_date = value[12] || new Date(chartYear, 0, 1);
+                        var end_date = value[14] || value[13] || new Date(chartYear, 11, 31);
+
+                        if (isNaN(Date.parse(start_date))) {
+                            start_date = new Date(chartYear, 0, 1);
+                        }
+
+                        if (isNaN(Date.parse(end_date))) {
+                            end_date = new Date(chartYear, 11, 31);
+                        }
+
+                        !isNaN(Date.parse())
+                        var g_start_date = new Date(start_date).toISOString().split('T')[0];
+                        var g_end_date = new Date(end_date).toISOString().split('T')[0];
+                        var row = {
+                            id: value[7],
+                            name: value[7],
+                            start: g_start_date,
+                            end: g_end_date,
+                            progress: 100,
+                            dependencies: '',
+                            custom_class: 'wbs-' + value[2] + '-color'
+                        };
+                        res.push(row);
+                    }
+                    return res;
+                }, []);
+                var filterTasks = filterData(tasks);
+                if (gantt == null) {
+                    gantt = new Gantt('#gantt', filterTasks, {column_width: 5});
+                } else {
+                    gantt.refresh(filterTasks)
+                }
+                gantt.change_view_mode('Month');
+            }, function (response) {
+                appendPre('Error: ' + response.result.error.message);
+            });
+        }
     }
 
     function makeGantt2020(chartYear) {
