@@ -232,8 +232,8 @@
                 var data = range.values;
                 var tasks = data.reduce(function (res, value) {
                     if ((value[3] != null && value[3] != "")) {
-                        var start_date = value[12] || new Date(chartYear, 0, 1);
-                        var end_date = value[14] || value[13] || new Date(chartYear, 11, 31);
+                        var start_date = value[11] || new Date(chartYear, 0, 1);
+                        var end_date = value[12] || value[13] || new Date(chartYear, 11, 31);
 
                         if (isNaN(Date.parse(start_date))) {
                             start_date = new Date(chartYear, 0, 1);
