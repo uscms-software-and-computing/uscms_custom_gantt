@@ -43,16 +43,19 @@
 .gantt .bar-progress {
   fill: #a3a3ff; }
 
-.gantt .wbs-1-color .bar-progress {
+.gantt .s_c_ops_program-color .bar-progress {
+  fill: orange; }
+
+.gantt .wbs1-color .bar-progress {
   fill: red; }
 
-.gantt .wbs-2-color .bar-progress {
+.gantt .wbs2-color .bar-progress {
   fill: blue; }
 
-.gantt .wbs-3-color .bar-progress {
+.gantt .wbs3-color .bar-progress {
   fill: green; }
 
-.gantt .wbs-4-color .bar-progress {
+.gantt .wbs4-color .bar-progress {
   fill: purple; }
 
 .gantt .bar-invalid {
